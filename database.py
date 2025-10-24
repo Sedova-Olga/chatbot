@@ -2,14 +2,13 @@
 import sqlite3
 import json
 
-DB_NAME = "updates.db"
+DB_FILE = "updates.db"
 
 def init_db():
-    """Создаёт таблицу для хранения полных апдейтов."""
-    conn = sqlite3.connect(DB_NAME)
+    conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
     cursor.execute("""
-        CREATE TABLE IF NOT EXISTS updates (
+        CREATE TABLE IF NOT EXISTS telegram_updates (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             update_id INTEGER UNIQUE NOT NULL,
             raw_update TEXT NOT NULL,
@@ -20,14 +19,12 @@ def init_db():
     conn.close()
 
 def save_update(update: dict):
-    """Сохраняет полный JSON-апдейт в базу."""
     update_id = update["update_id"]
     raw = json.dumps(update, ensure_ascii=False)
-
-    conn = sqlite3.connect(DB_NAME)
+    conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
     cursor.execute(
-        "INSERT OR IGNORE INTO updates (update_id, raw_update) VALUES (?, ?)",
+        "INSERT OR IGNORE INTO telegram_updates (update_id, raw_update) VALUES (?, ?)",
         (update_id, raw)
     )
     conn.commit()
