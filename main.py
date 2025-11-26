@@ -1,18 +1,29 @@
 # main.py
 from dispatcher import Dispatcher
 from long_polling import start_long_polling
-from handlers.database_logger import DatabaseLogger
-from handlers.message_text_echo import MessageTextEcho
-from handlers.message_photo_echo import MessagePhotoEcho
-from database import init_db
+from database_client import init_db
+from handlers.start import StartHandler
+from handlers.pizza_name import PizzaNameHandler
+from handlers.pizza_size import PizzaSizeHandler
+from handlers.drinks import DrinksHandler
+from handlers.confirm_order import ConfirmOrderHandler
+from handlers.restart import RestartHandler
 
 def main():
     init_db()
     dp = Dispatcher()
-    # Порядок важен: сначала логгер, потом обработчики
-    dp.add_handler(DatabaseLogger())
-    dp.add_handler(MessageTextEcho())
-    dp.add_handler(MessagePhotoEcho())
+    
+    # 1. Специальные команды (перезапуск)
+    dp.add_handler(RestartHandler())
+    
+    # 2. Подтверждение заказа (работает в состоянии WAIT_FOR_ORDER_APPROVE)
+    dp.add_handler(ConfirmOrderHandler())
+    
+    # 3. Обычные шаги заказа
+    dp.add_handler(StartHandler())
+    dp.add_handler(PizzaNameHandler())
+    dp.add_handler(PizzaSizeHandler())
+    dp.add_handler(DrinksHandler())
 
     start_long_polling(dp)
 

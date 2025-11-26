@@ -1,31 +1,36 @@
-# database.py
-import sqlite3
+# telegram_api.py
+import os
 import json
+import urllib.request
+import urllib.parse
+from dotenv import load_dotenv
 
-DB_FILE = "updates.db"
+load_dotenv()
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+if not BOT_TOKEN:
+    raise RuntimeError("BOT_TOKEN не найден в .env")
 
-def init_db():
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS telegram_updates (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            update_id INTEGER UNIQUE NOT NULL,
-            raw_update TEXT NOT NULL,
-            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-        )
-    """)
-    conn.commit()
-    conn.close()
+BASE_URL = f"https://api.telegram.org/bot{BOT_TOKEN}"
 
-def save_update(update: dict):
-    update_id = update["update_id"]
-    raw = json.dumps(update, ensure_ascii=False)
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
-    cursor.execute(
-        "INSERT OR IGNORE INTO telegram_updates (update_id, raw_update) VALUES (?, ?)",
-        (update_id, raw)
-    )
-    conn.commit()
-    conn.close()
+def get_updates(offset: int = None) -> dict | None:
+    url = f"{BASE_URL}/getUpdates"
+    if offset is not None:
+        url += f"?offset={offset}"
+    try:
+        with urllib.request.urlopen(url) as resp:
+            return json.loads(resp.read().decode())
+    except Exception as e:
+        print(f"[API] get_updates error: {e}")
+        return None
+
+def send_message(chat_id: int, text: str, reply_markup: dict = None):
+    url = f"{BASE_URL}/sendMessage"
+    payload = {"chat_id": chat_id, "text": text}
+    if reply_markup:
+        payload["reply_markup"] = json.dumps(reply_markup)
+    data = urllib.parse.urlencode(payload).encode()
+    req = urllib.request.Request(url, data=data)
+    try:
+        urllib.request.urlopen(req)
+    except Exception as e:
+        print(f"[API] send_message error: {e}")
