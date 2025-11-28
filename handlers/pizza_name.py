@@ -1,19 +1,32 @@
 # handlers/pizza_name.py
 from handler import Handler
-from telegram_api import send_message
-
-# Допустимые названия пицц
-ALLOWED_PIZZAS = {"маргарита", "пепперони", "гавайская"}
+from telegram_api import answer_callback_query, send_message_with_inline_keyboard
 
 class PizzaNameHandler(Handler):
     def check_update(self, update: dict, user_data: dict) -> bool:
-        return user_data["state"] == "WAIT_FOR_PIZZA_NAME"
+        return (
+            user_data["state"] == "WAIT_FOR_PIZZA_NAME"
+            and "callback_query" in update
+            and update["callback_query"]["data"].startswith("pizza:")
+        )
 
     def handle_update(self, update: dict, user_data: dict, chat_id: int) -> str | None:
-        pizza = update.get("message", {}).get("text", "").strip().lower()
-        if pizza not in ALLOWED_PIZZAS:
-            send_message(chat_id, f"Извините, у нас нет такой пиццы.\nДоступные варианты:\n{', '.join(sorted(ALLOWED_PIZZAS))}")
-            return None  # не меняем состояние
-        user_data["order_json"]["pizza_name"] = pizza.capitalize()
-        send_message(chat_id, f"Отлично! Вы выбрали: {pizza.capitalize()}\nТеперь укажите размер: S, M, L")
+        callback = update["callback_query"]
+        callback_id = callback["id"]
+        data = callback["data"]
+        answer_callback_query(callback_id)
+
+        pizza_map = {
+            "pizza:margarita": "Маргарита",
+            "pizza:pepperoni": "Пепперони",
+            "pizza:hawaiian": "Гавайская"
+        }
+        pizza_name = pizza_map.get(data, "Неизвестная пицца")
+        user_data["order_json"]["pizza_name"] = pizza_name
+
+        send_message_with_inline_keyboard(chat_id, "Выберите размер:", [
+            [{"text": "S", "callback_data": "size:S"}],
+            [{"text": "M", "callback_data": "size:M"}],
+            [{"text": "L", "callback_data": "size:L"}]
+        ])
         return "WAIT_FOR_PIZZA_SIZE"

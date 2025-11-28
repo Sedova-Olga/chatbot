@@ -1,12 +1,15 @@
 # handlers/start.py
 from handler import Handler
-from telegram_api import send_message
+from telegram_api import send_message_with_inline_keyboard
 
 class StartHandler(Handler):
-    def check_update(self, update: dict, user_dict: dict) -> bool:
-        text = update.get("message", {}).get("text", "")
-        return text == "/start"
+    def check_update(self, update: dict, user_data: dict) -> bool:
+        return update.get("message", {}).get("text") == "/start"
 
-    def handle_update(self, update: dict, user_dict: dict, chat_id: int) -> str:
-        send_message(chat_id, "Добро пожаловать в Pizza Shop! 🍕\nКакую пиццу хотите?\nНапример: Маргарита, Пепперони, Гавайская")
+    def handle_update(self, update: dict, user_data: dict, chat_id: int) -> str | None:
+        send_message_with_inline_keyboard(chat_id, "Выберите пиццу:", [
+            [{"text": "Маргарита", "callback_data": "pizza:margarita"}],
+            [{"text": "Пепперони", "callback_data": "pizza:pepperoni"}],
+            [{"text": "Гавайская", "callback_data": "pizza:hawaiian"}]
+        ])
         return "WAIT_FOR_PIZZA_NAME"
