@@ -11,12 +11,11 @@ from handlers.confirm_order import ConfirmOrderHandler
 def main():
     init_db()
     dp = Dispatcher()
-    dp.add_handler(StartHandler())
     dp.add_handler(ConfirmOrderHandler())
-    dp.add_handler(PizzaNameHandler())
-    dp.add_handler(PizzaSizeHandler())
     dp.add_handler(DrinksHandler())
+    dp.add_handler(PizzaSizeHandler())
+    dp.add_handler(PizzaNameHandler())
+    dp.add_handler(StartHandler())
     start_long_polling(dp)
-
 if __name__ == "__main__":
     main()

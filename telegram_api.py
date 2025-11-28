@@ -34,11 +34,10 @@ def send_message(chat_id: int, text: str):
 
 def send_message_with_inline_keyboard(chat_id: int, text: str, buttons: list):
     url = f"{BASE_URL}/sendMessage"
-    reply_markup = {"inline_keyboard": buttons}
     payload = {
         "chat_id": chat_id,
         "text": text,
-        "reply_markup": json.dumps(reply_markup)
+        "reply_markup": json.dumps({"inline_keyboard": buttons})
     }
     data = urllib.parse.urlencode(payload).encode()
     req = urllib.request.Request(url, data=data)
