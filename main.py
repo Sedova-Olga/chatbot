@@ -11,12 +11,13 @@ from handlers.pizza_size import PizzaSizeHandler
 from handlers.drinks import DrinksHandler
 from handlers.confirm_order import ConfirmOrderHandler
 from handlers.update_database_logger import UpdateDatabaseLogger
+from implementations.postgres_db import PostgresDatabase
 
 
 def main():
     # Инициализация зависимостей
-    db: Database = SqliteDatabase(db_path="messages.db")
-    telegram: TelegramClient = TelegramApiClient()
+    db = PostgresDatabase()
+    telegram = TelegramApiClient()
 
     # Настройка диспетчера
     dp = Dispatcher()
