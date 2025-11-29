@@ -3,6 +3,7 @@ import json
 from interfaces.database import Database
 import pg8000
 
+
 class PostgresDatabase(Database):
     def __init__(self):
         self._init_connection()
@@ -14,26 +15,28 @@ class PostgresDatabase(Database):
             port=int(os.getenv("DB_PORT", "5432")),
             user=os.getenv("DB_USER", "postgres"),
             password=os.getenv("DB_PASSWORD", "postgres"),
-            database=os.getenv("DB_NAME", "pizza_bot")
+            database=os.getenv("DB_NAME", "pizza_bot"),
         )
 
     def _init_db(self):
         with self.conn.cursor() as cur:
-            cur.execute("""
+            cur.execute(
+                """
                 CREATE TABLE IF NOT EXISTS users (
                     user_id BIGINT PRIMARY KEY,
                     state TEXT,
                     last_message_id INTEGER,
                     order_json TEXT
                 )
-            """)
+            """
+            )
             self.conn.commit()
 
     def get_user(self, user_id):
         with self.conn.cursor() as cur:
             cur.execute(
                 "SELECT state, last_message_id, order_json FROM users WHERE user_id = %s",
-                (user_id,)
+                (user_id,),
             )
             row = cur.fetchone()
             if row:
@@ -41,7 +44,7 @@ class PostgresDatabase(Database):
                 return {
                     "state": row[0],
                     "last_message_id": row[1],
-                    "order_json": order_json
+                    "order_json": order_json,
                 }
         return None
 
@@ -56,6 +59,6 @@ class PostgresDatabase(Database):
         with self.conn.cursor() as cur:
             cur.execute(
                 "INSERT INTO users (user_id) VALUES (%s) ON CONFLICT DO NOTHING",
-                (user_id,)
+                (user_id,),
             )
             self.conn.commit()

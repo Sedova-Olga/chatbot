@@ -1,9 +1,6 @@
 # main.py
 from dispatcher import Dispatcher
 from long_polling import start_long_polling
-from interfaces.database import Database
-from interfaces.telegram import TelegramClient
-from implementations.sqlite_db import SqliteDatabase
 from implementations.telegram_api_impl import TelegramApiClient
 from handlers.start import StartHandler
 from handlers.pizza_name import PizzaNameHandler
