@@ -3,6 +3,7 @@ from handler import Handler
 from telegram_api import send_message
 from database_client import update_user
 
+
 class RestartHandler(Handler):
     def check_update(self, update: dict, user_data: dict) -> bool:
         text = update.get("message", {}).get("text", "").lower()

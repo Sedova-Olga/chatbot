@@ -2,6 +2,7 @@
 from typing import List
 from handler import Handler
 
+
 class Dispatcher:
     def __init__(self):
         self.handlers = []
@@ -13,4 +14,4 @@ class Dispatcher:
         for handler in self.handlers:
             if handler.check_update(update):
                 handler.handle_update(update)
-                break 
+                break

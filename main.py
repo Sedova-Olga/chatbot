@@ -10,11 +10,12 @@ from handlers.drinks import DrinksHandler
 from handlers.confirm_order import ConfirmOrderHandler
 from handlers.update_database_logger import UpdateDatabaseLogger
 
+
 def main():
     init_db()
     db = sqlite3.connect("messages.db", check_same_thread=False)
     dp = Dispatcher()
-    dp.add_handler(StartHandler(db)) 
+    dp.add_handler(StartHandler(db))
     dp.add_handler(PizzaNameHandler(db))
     dp.add_handler(PizzaSizeHandler(db))
     dp.add_handler(DrinksHandler(db))
@@ -22,6 +23,7 @@ def main():
     dp.add_handler(UpdateDatabaseLogger("messages.db"))
 
     start_long_polling(dp)
+
 
 if __name__ == "__main__":
     main()

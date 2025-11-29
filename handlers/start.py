@@ -3,6 +3,7 @@ from handler import Handler
 from telegram_api import send_message_with_inline_keyboard, delete_message
 from database_client import create_user, get_user, update_user
 
+
 class StartHandler(Handler):
     def __init__(self, db):
         self.db = db
@@ -31,8 +32,8 @@ class StartHandler(Handler):
             [
                 [{"text": "Маргарита", "callback_data": "pizza:margarita"}],
                 [{"text": "Пепперони", "callback_data": "pizza:pepperoni"}],
-                [{"text": "Гавайская", "callback_data": "pizza:hawaiian"}]
-            ]
+                [{"text": "Гавайская", "callback_data": "pizza:hawaiian"}],
+            ],
         )
 
         new_message_id = None
@@ -43,5 +44,5 @@ class StartHandler(Handler):
             self.db,
             user_id,
             state="WAIT_FOR_PIZZA_NAME",
-            last_message_id=new_message_id
+            last_message_id=new_message_id,
         )

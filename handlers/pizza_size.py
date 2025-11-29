@@ -1,18 +1,22 @@
 # handlers/pizza_size.py
 from handler import Handler
-from telegram_api import answer_callback_query, send_message_with_inline_keyboard, delete_message
+from telegram_api import (
+    answer_callback_query,
+    send_message_with_inline_keyboard,
+    delete_message,
+)
 from database_client import get_user, update_user
 import json
+
 
 class PizzaSizeHandler(Handler):
     def __init__(self, db):
         self.db = db
 
     def check_update(self, update: dict) -> bool:
-        return (
-            "callback_query" in update
-            and update["callback_query"]["data"].startswith("size:")
-        )
+        return "callback_query" in update and update["callback_query"][
+            "data"
+        ].startswith("size:")
 
     def handle_update(self, update: dict):
         cb = update["callback_query"]
@@ -47,16 +51,18 @@ class PizzaSizeHandler(Handler):
                 [{"text": "Кола", "callback_data": "drink:cola"}],
                 [{"text": "Спрайт", "callback_data": "drink:sprite"}],
                 [{"text": "Фанта", "callback_data": "drink:fanta"}],
-                [{"text": "Нет", "callback_data": "drink:no"}]
-            ]
+                [{"text": "Нет", "callback_data": "drink:no"}],
+            ],
         )
 
-        new_message_id = response["result"]["message_id"] if response.get("ok") else None
+        new_message_id = (
+            response["result"]["message_id"] if response.get("ok") else None
+        )
 
         update_user(
             self.db,
             user_id,
             state="WAIT_FOR_DRINKS",
             order_json=json.dumps(order_json, ensure_ascii=False),  # ← вот здесь!
-            last_message_id=new_message_id
+            last_message_id=new_message_id,
         )
