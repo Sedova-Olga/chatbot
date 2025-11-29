@@ -4,16 +4,16 @@ from handler import Handler
 from interfaces.telegram import TelegramClient
 from interfaces.database import Database
 
+
 class DrinksHandler(Handler):
     def __init__(self, telegram: TelegramClient, db: Database):
         self.telegram = telegram
         self.db = db
 
     def check_update(self, update: dict) -> bool:
-        return (
-            "callback_query" in update
-            and update["callback_query"]["data"].startswith("drink:")
-        )
+        return "callback_query" in update and update["callback_query"][
+            "data"
+        ].startswith("drink:")
 
     def handle_update(self, update: dict):
         cb = update["callback_query"]
@@ -28,7 +28,7 @@ class DrinksHandler(Handler):
             "drink:cola": "Кола",
             "drink:sprite": "Спрайт",
             "drink:fanta": "Фанта",
-            "drink:no": "—"
+            "drink:no": "—",
         }
         drink = drink_map.get(data, "—")
 
@@ -56,13 +56,11 @@ class DrinksHandler(Handler):
 
         buttons = [
             [{"text": "✅ Да", "callback_data": "confirm:yes"}],
-            [{"text": "❌ Нет", "callback_data": "confirm:no"}]
+            [{"text": "❌ Нет", "callback_data": "confirm:no"}],
         ]
 
         response = self.telegram.send_message_with_inline_keyboard(
-            chat_id,
-            text,
-            buttons
+            chat_id, text, buttons
         )
 
         new_msg_id = response["result"]["message_id"] if response.get("ok") else None
@@ -71,5 +69,5 @@ class DrinksHandler(Handler):
             user_id,
             state="WAIT_FOR_ORDER_APPROVE",
             order_json=json.dumps(order_json, ensure_ascii=False),
-            last_message_id=new_msg_id
+            last_message_id=new_msg_id,
         )

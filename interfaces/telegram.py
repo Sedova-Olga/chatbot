@@ -1,9 +1,12 @@
 from abc import ABC, abstractmethod
 from typing import Dict, List, Optional
 
+
 class TelegramClient(ABC):
     @abstractmethod
-    def send_message(self, chat_id: int, text: str, parse_mode: Optional[str] = None) -> Dict:
+    def send_message(
+        self, chat_id: int, text: str, parse_mode: Optional[str] = None
+    ) -> Dict:
         pass
 
     @abstractmethod
@@ -12,7 +15,7 @@ class TelegramClient(ABC):
         chat_id: int,
         text: str,
         buttons: List[List[Dict[str, str]]],
-        parse_mode: Optional[str] = None
+        parse_mode: Optional[str] = None,
     ) -> Dict:
         pass
 
@@ -21,5 +24,7 @@ class TelegramClient(ABC):
         pass
 
     @abstractmethod
-    def answer_callback_query(self, callback_id: str, text: Optional[str] = None) -> Dict:
+    def answer_callback_query(
+        self, callback_id: str, text: Optional[str] = None
+    ) -> Dict:
         pass

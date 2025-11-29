@@ -12,6 +12,7 @@ from handlers.drinks import DrinksHandler
 from handlers.confirm_order import ConfirmOrderHandler
 from handlers.update_database_logger import UpdateDatabaseLogger
 
+
 def main():
     # Инициализация зависимостей
     db: Database = SqliteDatabase(db_path="messages.db")

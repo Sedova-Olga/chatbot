@@ -4,16 +4,16 @@ from handler import Handler
 from interfaces.telegram import TelegramClient
 from interfaces.database import Database
 
+
 class PizzaSizeHandler(Handler):
     def __init__(self, telegram: TelegramClient, db: Database):
         self.telegram = telegram
         self.db = db
 
     def check_update(self, update: dict) -> bool:
-        return (
-            "callback_query" in update
-            and update["callback_query"]["data"].startswith("size:")
-        )
+        return "callback_query" in update and update["callback_query"][
+            "data"
+        ].startswith("size:")
 
     def handle_update(self, update: dict):
         cb = update["callback_query"]
@@ -48,8 +48,8 @@ class PizzaSizeHandler(Handler):
                 [{"text": "Кола", "callback_data": "drink:cola"}],
                 [{"text": "Спрайт", "callback_data": "drink:sprite"}],
                 [{"text": "Фанта", "callback_data": "drink:fanta"}],
-                [{"text": "Нет", "callback_data": "drink:no"}]
-            ]
+                [{"text": "Нет", "callback_data": "drink:no"}],
+            ],
         )
 
         new_msg_id = response["result"]["message_id"] if response.get("ok") else None
@@ -58,5 +58,5 @@ class PizzaSizeHandler(Handler):
             user_id,
             state="WAIT_FOR_DRINKS",
             order_json=json.dumps(order_json, ensure_ascii=False),
-            last_message_id=new_msg_id
+            last_message_id=new_msg_id,
         )

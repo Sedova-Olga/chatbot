@@ -4,6 +4,7 @@ from handler import Handler
 from interfaces.telegram import TelegramClient
 from interfaces.database import Database
 
+
 class StartHandler(Handler):
     def __init__(self, telegram: TelegramClient, db: Database):
         self.telegram = telegram
@@ -32,8 +33,8 @@ class StartHandler(Handler):
             [
                 [{"text": "Маргарита", "callback_data": "pizza:margarita"}],
                 [{"text": "Пепперони", "callback_data": "pizza:pepperoni"}],
-                [{"text": "Гавайская", "callback_data": "pizza:hawaiian"}]
-            ]
+                [{"text": "Гавайская", "callback_data": "pizza:hawaiian"}],
+            ],
         )
 
         new_msg_id = response["result"]["message_id"] if response.get("ok") else None
@@ -41,5 +42,5 @@ class StartHandler(Handler):
             user_id,
             state="WAIT_FOR_PIZZA_NAME",
             order_json=json.dumps({}),
-            last_message_id=new_msg_id
+            last_message_id=new_msg_id,
         )

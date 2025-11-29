@@ -4,16 +4,16 @@ from handler import Handler
 from interfaces.telegram import TelegramClient
 from interfaces.database import Database
 
+
 class ConfirmOrderHandler(Handler):
     def __init__(self, telegram: TelegramClient, db: Database):
         self.telegram = telegram
         self.db = db
 
     def check_update(self, update: dict) -> bool:
-        return (
-            "callback_query" in update
-            and update["callback_query"]["data"].startswith("confirm:")
-        )
+        return "callback_query" in update and update["callback_query"][
+            "data"
+        ].startswith("confirm:")
 
     def handle_update(self, update: dict):
         cb = update["callback_query"]
@@ -65,5 +65,5 @@ class ConfirmOrderHandler(Handler):
             user_id,
             state="ORDER_FINISHED",
             order_json=json.dumps(order_json, ensure_ascii=False),
-            last_message_id=None
+            last_message_id=None,
         )

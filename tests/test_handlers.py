@@ -6,16 +6,22 @@ from handlers.drinks import DrinksHandler
 from handlers.start import StartHandler
 from implementations.sqlite_db import SqliteDatabase  # ← импортируем реализацию
 
+
 def test_pizza_name_handler_saves_order():
     telegram = Mock()
-    telegram.send_message_with_inline_keyboard.return_value = {"ok": True, "result": {"message_id": 456}}
+    telegram.send_message_with_inline_keyboard.return_value = {
+        "ok": True,
+        "result": {"message_id": 456},
+    }
     telegram.delete_message.return_value = None
     telegram.answer_callback_query.return_value = None
 
     # Используем РЕАЛИЗАЦИЮ, а не сырое соединение
     db = SqliteDatabase("messages.db")  # ← временная БД в памяти
     db.create_user(123)
-    db.update_user(123, state="WAIT_FOR_PIZZA_NAME", order_json="{}", last_message_id=123)
+    db.update_user(
+        123, state="WAIT_FOR_PIZZA_NAME", order_json="{}", last_message_id=123
+    )
 
     handler = PizzaNameHandler(telegram, db)
 
@@ -24,7 +30,7 @@ def test_pizza_name_handler_saves_order():
             "id": "1",
             "from": {"id": 123},
             "message": {"chat": {"id": 123}},
-            "data": "pizza:pepperoni"
+            "data": "pizza:pepperoni",
         }
     }
 
@@ -36,15 +42,18 @@ def test_pizza_name_handler_saves_order():
         order = json.loads(order)
     assert order["pizza_name"] == "Пепперони"
 
+
 def test_start_handler_initializes_user_and_sends_pizza_menu():
     import tempfile
     import os
     from unittest.mock import Mock
-    from handlers.start import StartHandler
     from implementations.sqlite_db import SqliteDatabase
 
     telegram = Mock()
-    telegram.send_message_with_inline_keyboard.return_value = {"ok": True, "result": {"message_id": 100}}
+    telegram.send_message_with_inline_keyboard.return_value = {
+        "ok": True,
+        "result": {"message_id": 100},
+    }
     telegram.delete_message.return_value = None
 
     # Создаём временную БД
@@ -56,11 +65,7 @@ def test_start_handler_initializes_user_and_sends_pizza_menu():
         handler = StartHandler(telegram, db)
 
         update = {
-            "message": {
-                "text": "/start",
-                "from": {"id": 555},
-                "chat": {"id": 555}
-            }
+            "message": {"text": "/start", "from": {"id": 555}, "chat": {"id": 555}}
         }
 
         handler.handle_update(update)
@@ -69,7 +74,7 @@ def test_start_handler_initializes_user_and_sends_pizza_menu():
         user_data = db.get_user(555)
         assert user_data is not None
         assert user_data["state"] == "WAIT_FOR_PIZZA_NAME"
-        
+
         order = user_data["order_json"]
         if isinstance(order, str):
             order = json.loads(order)
@@ -88,16 +93,19 @@ def test_start_handler_initializes_user_and_sends_pizza_menu():
         if os.path.exists(db_path):
             os.remove(db_path)
 
+
 def test_drinks_handler_saves_drink_and_formats_order():
     import tempfile
     import os
     import json
     from unittest.mock import Mock
-    from handlers.drinks import DrinksHandler
     from implementations.sqlite_db import SqliteDatabase
 
     telegram = Mock()
-    telegram.send_message_with_inline_keyboard.return_value = {"ok": True, "result": {"message_id": 999}}
+    telegram.send_message_with_inline_keyboard.return_value = {
+        "ok": True,
+        "result": {"message_id": 999},
+    }
     telegram.delete_message.return_value = None
     telegram.answer_callback_query.return_value = None
 
@@ -112,9 +120,7 @@ def test_drinks_handler_saves_drink_and_formats_order():
         db.create_user(789)
         initial_order = {"pizza_name": "Маргарита", "pizza_size": "L"}
         db.update_user(
-            789,
-            state="WAIT_FOR_DRINKS",
-            order_json=json.dumps(initial_order)
+            789, state="WAIT_FOR_DRINKS", order_json=json.dumps(initial_order)
         )
 
         handler = DrinksHandler(telegram, db)
@@ -123,7 +129,7 @@ def test_drinks_handler_saves_drink_and_formats_order():
                 "id": "2",
                 "from": {"id": 789},
                 "message": {"chat": {"id": 789}},
-                "data": "drink:cola"
+                "data": "drink:cola",
             }
         }
 

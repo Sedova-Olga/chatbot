@@ -4,16 +4,16 @@ from handler import Handler
 from interfaces.telegram import TelegramClient
 from interfaces.database import Database
 
+
 class PizzaNameHandler(Handler):
     def __init__(self, telegram: TelegramClient, db: Database):
         self.telegram = telegram
         self.db = db
 
     def check_update(self, update: dict) -> bool:
-        return (
-            "callback_query" in update
-            and update["callback_query"]["data"].startswith("pizza:")
-        )
+        return "callback_query" in update and update["callback_query"][
+            "data"
+        ].startswith("pizza:")
 
     def handle_update(self, update: dict):
         cb = update["callback_query"]
@@ -27,7 +27,7 @@ class PizzaNameHandler(Handler):
         pizza_map = {
             "pizza:margarita": "Маргарита",
             "pizza:pepperoni": "Пепперони",
-            "pizza:hawaiian": "Гавайская"
+            "pizza:hawaiian": "Гавайская",
         }
         pizza_name = pizza_map.get(data, "Неизвестная")
 
@@ -51,8 +51,8 @@ class PizzaNameHandler(Handler):
             [
                 [{"text": "S", "callback_data": "size:S"}],
                 [{"text": "M", "callback_data": "size:M"}],
-                [{"text": "L", "callback_data": "size:L"}]
-            ]
+                [{"text": "L", "callback_data": "size:L"}],
+            ],
         )
 
         new_msg_id = response["result"]["message_id"] if response.get("ok") else None
@@ -61,5 +61,5 @@ class PizzaNameHandler(Handler):
             user_id,
             state="WAIT_FOR_PIZZA_SIZE",
             order_json=json.dumps(order_json, ensure_ascii=False),
-            last_message_id=new_msg_id
+            last_message_id=new_msg_id,
         )
