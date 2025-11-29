@@ -1,6 +1,4 @@
 # dispatcher.py
-from typing import List
-from handler import Handler
 
 
 class Dispatcher:
