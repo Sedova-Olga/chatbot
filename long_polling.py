@@ -1,13 +1,21 @@
 # long_polling.py
+import time
 from telegram_api import get_updates
+from database_client import save_telegram_event
 
 def start_long_polling(dispatcher):
-    print("🍕 Pizza Bot запущен. Ожидание заказов...")
     offset = None
+    print("🍕 Pizza Bot запущен. Ожидание заказов...")
     while True:
-        updates = get_updates(offset)
-        if not updates or not updates.get("ok"):
-            continue
-        for update in updates["result"]:
-            offset = update["update_id"] + 1
-            dispatcher.process_update(update)
+        try:
+            updates = get_updates(offset)
+            for update in updates.get("result", []):
+                save_telegram_event(update)
+                dispatcher.process_update(update)
+                offset = update["update_id"] + 1
+        except KeyboardInterrupt:
+            print("\n🛑 Бот остановлен.")
+            break
+        except Exception as e:
+            print(f"Ошибка: {e}")
+            time.sleep(3)

@@ -4,13 +4,13 @@ from handler import Handler
 
 class Dispatcher:
     def __init__(self):
-        self.handlers: List[Handler] = []
+        self.handlers = []
 
-    def add_handler(self, handler: Handler):
+    def add_handler(self, handler):
         self.handlers.append(handler)
 
-    def process_update(self, update: dict):
+    def process_update(self, update):
         for handler in self.handlers:
             if handler.check_update(update):
                 handler.handle_update(update)
-                break
+                break 

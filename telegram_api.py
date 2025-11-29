@@ -33,7 +33,6 @@ def _make_request(method: str, params: Optional[Dict[str, Any]] = None) -> Dict:
     url = f"{BASE_URL}/{method}"
     data = None
     if params:
-        # Используем JSON, если есть сложные структуры (например, reply_markup)
         if any(isinstance(v, (dict, list)) for v in params.values()):
             data = json.dumps(params).encode("utf-8")
             headers = {"Content-Type": "application/json"}
@@ -89,3 +88,8 @@ def answer_callback_query(callback_query_id: str, text: Optional[str] = None, sh
     if show_alert:
         params["show_alert"] = show_alert
     return _make_request("answerCallbackQuery", params)
+
+def delete_message(chat_id: int, message_id: int):
+    """Удаляет сообщение по его ID."""
+    params = {"chat_id": chat_id, "message_id": message_id}
+    return _make_request("deleteMessage", params)

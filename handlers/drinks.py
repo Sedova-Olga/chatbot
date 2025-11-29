@@ -1,9 +1,13 @@
 # handlers/drinks.py
+import json
 from handler import Handler
-from telegram_api import answer_callback_query, send_message_with_inline_keyboard
+from telegram_api import answer_callback_query, send_message_with_inline_keyboard, delete_message
 from database_client import get_user, update_user
 
 class DrinksHandler(Handler):
+    def __init__(self, db):
+        self.db = db
+
     def check_update(self, update: dict) -> bool:
         return (
             "callback_query" in update
@@ -27,23 +31,32 @@ class DrinksHandler(Handler):
         }
         drink = drink_map.get(data, "Неизвестный")
 
-        user_data = get_user(user_id)
+        user_data = get_user(self.db, user_id)
         if user_data is None:
             return
 
-        user_data["order_json"]["drink"] = drink
+        order_json = user_data.get("order_json") or {}
+        if isinstance(order_json, str):
+            order_json = json.loads(order_json)
 
-        # Формируем сообщение с заказом
-        order = user_data["order_json"]
+        order_json["drink"] = drink
+
+        last_msg_id = user_data.get("last_message_id")
+        if last_msg_id:
+            try:
+                delete_message(chat_id, last_msg_id)
+            except Exception as e:
+                print(f"Не удалось удалить сообщение {last_msg_id}: {e}")
+
         text = (
             f"Ваш заказ:\n"
-            f"Пицца: {order['pizza_name']}\n"
-            f"Размер: {order['pizza_size']}\n"
-            f"Напиток: {order['drink']}\n\n"
+            f"Пицца: {order_json['pizza_name']}\n"
+            f"Размер: {order_json['pizza_size']}\n"
+            f"Напиток: {order_json['drink']}\n\n"
             f"Подтвердить?"
         )
 
-        send_message_with_inline_keyboard(
+        response = send_message_with_inline_keyboard(
             chat_id,
             text,
             [
@@ -52,4 +65,11 @@ class DrinksHandler(Handler):
             ]
         )
 
-        update_user(user_id, state="WAIT_FOR_ORDER_APPROVE", order_json=user_data["order_json"])
+        new_message_id = response["result"]["message_id"] if response.get("ok") else None
+        update_user(
+            self.db,
+            user_id,
+            state="WAIT_FOR_ORDER_APPROVE",
+            order_json=json.dumps(order_json, ensure_ascii=False),
+            last_message_id=new_message_id
+        )
