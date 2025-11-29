@@ -1,22 +1,19 @@
 # handlers/drinks.py
 import json
 from handler import Handler
-from telegram_api import (
-    answer_callback_query,
-    send_message_with_inline_keyboard,
-    delete_message,
-)
-from database_client import get_user, update_user
-
+from interfaces.telegram import TelegramClient
+from interfaces.database import Database
 
 class DrinksHandler(Handler):
-    def __init__(self, db):
+    def __init__(self, telegram: TelegramClient, db: Database):
+        self.telegram = telegram
         self.db = db
 
     def check_update(self, update: dict) -> bool:
-        return "callback_query" in update and update["callback_query"][
-            "data"
-        ].startswith("drink:")
+        return (
+            "callback_query" in update
+            and update["callback_query"]["data"].startswith("drink:")
+        )
 
     def handle_update(self, update: dict):
         cb = update["callback_query"]
@@ -25,57 +22,54 @@ class DrinksHandler(Handler):
         chat_id = cb["message"]["chat"]["id"]
         data = cb["data"]
 
-        answer_callback_query(callback_id)
+        self.telegram.answer_callback_query(callback_id)
 
         drink_map = {
             "drink:cola": "Кола",
             "drink:sprite": "Спрайт",
             "drink:fanta": "Фанта",
-            "drink:no": "—",
+            "drink:no": "—"
         }
-        drink = drink_map.get(data, "Неизвестный")
+        drink = drink_map.get(data, "—")
 
-        user_data = get_user(self.db, user_id)
-        if user_data is None:
+        user_data = self.db.get_user(user_id)
+        if not user_data:
             return
 
         order_json = user_data.get("order_json") or {}
-        if isinstance(order_json, str):
-            order_json = json.loads(order_json)
-
         order_json["drink"] = drink
 
         last_msg_id = user_data.get("last_message_id")
         if last_msg_id:
             try:
-                delete_message(chat_id, last_msg_id)
-            except Exception as e:
-                print(f"Не удалось удалить сообщение {last_msg_id}: {e}")
+                self.telegram.delete_message(chat_id, last_msg_id)
+            except Exception:
+                pass
 
         text = (
-            f"Ваш заказ:\n"
-            f"Пицца: {order_json['pizza_name']}\n"
-            f"Размер: {order_json['pizza_size']}\n"
-            f"Напиток: {order_json['drink']}\n\n"
-            f"Подтвердить?"
+            f"Ваш заказ:\n\n"
+            f"• Пицца: {order_json.get('pizza_name', '—')}\n"
+            f"• Размер: {order_json.get('pizza_size', '—')}\n"
+            f"• Напиток: {drink}\n\n"
+            "Подтвердить заказ?"
         )
 
-        response = send_message_with_inline_keyboard(
+        buttons = [
+            [{"text": "✅ Да", "callback_data": "confirm:yes"}],
+            [{"text": "❌ Нет", "callback_data": "confirm:no"}]
+        ]
+
+        response = self.telegram.send_message_with_inline_keyboard(
             chat_id,
             text,
-            [
-                [{"text": "✅ Да", "callback_data": "confirm:yes"}],
-                [{"text": "❌ Нет", "callback_data": "confirm:no"}],
-            ],
+            buttons
         )
 
-        new_message_id = (
-            response["result"]["message_id"] if response.get("ok") else None
-        )
-        update_user(
-            self.db,
+        new_msg_id = response["result"]["message_id"] if response.get("ok") else None
+
+        self.db.update_user(
             user_id,
             state="WAIT_FOR_ORDER_APPROVE",
             order_json=json.dumps(order_json, ensure_ascii=False),
-            last_message_id=new_message_id,
+            last_message_id=new_msg_id
         )

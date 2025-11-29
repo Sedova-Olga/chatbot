@@ -1,11 +1,12 @@
 # handlers/start.py
+import json
 from handler import Handler
-from telegram_api import send_message_with_inline_keyboard, delete_message
-from database_client import create_user, get_user, update_user
-
+from interfaces.telegram import TelegramClient
+from interfaces.database import Database
 
 class StartHandler(Handler):
-    def __init__(self, db):
+    def __init__(self, telegram: TelegramClient, db: Database):
+        self.telegram = telegram
         self.db = db
 
     def check_update(self, update: dict) -> bool:
@@ -15,34 +16,30 @@ class StartHandler(Handler):
         user_id = update["message"]["from"]["id"]
         chat_id = update["message"]["chat"]["id"]
 
-        create_user(self.db, user_id)
+        self.db.create_user(user_id)
+        user_data = self.db.get_user(user_id)
 
-        user_data = get_user(self.db, user_id)
-
-        last_msg_id = user_data.get("last_message_id")
+        last_msg_id = user_data.get("last_message_id") if user_data else None
         if last_msg_id:
             try:
-                delete_message(chat_id, last_msg_id)
-            except Exception as e:
-                print(f"Не удалось удалить сообщение {last_msg_id}: {e}")
+                self.telegram.delete_message(chat_id, last_msg_id)
+            except Exception:
+                pass
 
-        response = send_message_with_inline_keyboard(
+        response = self.telegram.send_message_with_inline_keyboard(
             chat_id,
             "🍕 Выберите пиццу:",
             [
                 [{"text": "Маргарита", "callback_data": "pizza:margarita"}],
                 [{"text": "Пепперони", "callback_data": "pizza:pepperoni"}],
-                [{"text": "Гавайская", "callback_data": "pizza:hawaiian"}],
-            ],
+                [{"text": "Гавайская", "callback_data": "pizza:hawaiian"}]
+            ]
         )
 
-        new_message_id = None
-        if response and response.get("ok"):
-            new_message_id = response["result"]["message_id"]
-
-        update_user(
-            self.db,
+        new_msg_id = response["result"]["message_id"] if response.get("ok") else None
+        self.db.update_user(
             user_id,
             state="WAIT_FOR_PIZZA_NAME",
-            last_message_id=new_message_id,
+            order_json=json.dumps({}),
+            last_message_id=new_msg_id
         )
