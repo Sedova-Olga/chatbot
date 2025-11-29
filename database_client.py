@@ -1,8 +1,8 @@
 # database_client.py
 import sqlite3
 import json
-
-DB_FILE = "pizza.db"
+import os
+DB_FILE = os.getenv("DB_FILE", "pizza.db")
 
 def init_db():
     conn = sqlite3.connect(DB_FILE)
