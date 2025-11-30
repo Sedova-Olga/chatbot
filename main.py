@@ -9,7 +9,9 @@ from handlers.drinks import DrinksHandler
 from handlers.confirm_order import ConfirmOrderHandler
 from handlers.update_database_logger import UpdateDatabaseLogger
 from implementations.postgres_db import PostgresDatabase
-
+from dotenv import load_dotenv
+import os
+load_dotenv() 
 
 def main():
     # Инициализация зависимостей
@@ -23,7 +25,7 @@ def main():
     dp.add_handler(PizzaSizeHandler(telegram, db))
     dp.add_handler(DrinksHandler(telegram, db))
     dp.add_handler(ConfirmOrderHandler(telegram, db))
-    dp.add_handler(UpdateDatabaseLogger("messages.db"))
+    dp.add_handler(UpdateDatabaseLogger(db))
 
     # Запуск
     start_long_polling(dp)

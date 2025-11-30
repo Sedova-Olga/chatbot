@@ -11,17 +11,5 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  bot:
-    build: .
-    environment:
-      BOT_TOKEN: ${BOT_TOKEN}
-      DB_HOST: db
-      DB_PORT: 5432
-      DB_USER: postgres
-      DB_PASSWORD: postgres
-      DB_NAME: pizza_bot
-    depends_on:
-      - db
-
 volumes:
   postgres_data:
