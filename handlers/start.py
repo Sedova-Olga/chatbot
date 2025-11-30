@@ -7,8 +7,8 @@ from interfaces.database import Database
 
 class StartHandler(Handler):
     def __init__(self, telegram: TelegramClient, db: Database):
-        self.telegram = telegram
-        self.db = db
+        self.telegram: TelegramClient = telegram
+        self.db: Database = db
 
     def check_update(self, update: dict) -> bool:
         return "message" in update and update["message"].get("text") == "/start"

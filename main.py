@@ -10,16 +10,15 @@ from handlers.confirm_order import ConfirmOrderHandler
 from handlers.update_database_logger import UpdateDatabaseLogger
 from implementations.postgres_db import PostgresDatabase
 from dotenv import load_dotenv
+from interfaces.database import Database
 
 load_dotenv()
 
 
 def main():
-    # Инициализация зависимостей
-    db = PostgresDatabase()
+    db: Database = PostgresDatabase()
     telegram = TelegramApiClient()
 
-    # Настройка диспетчера
     dp = Dispatcher()
     dp.add_handler(StartHandler(telegram, db))
     dp.add_handler(PizzaNameHandler(telegram, db))

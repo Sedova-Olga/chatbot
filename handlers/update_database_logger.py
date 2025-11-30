@@ -5,7 +5,7 @@ from interfaces.database import Database
 
 class UpdateDatabaseLogger(Handler):
     def __init__(self, db: Database):
-        self.db = db
+        self.db: Database = db
 
     def check_update(self, update: dict) -> bool:
         return True
