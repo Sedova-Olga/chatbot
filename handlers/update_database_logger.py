@@ -2,6 +2,7 @@
 from handler import Handler
 from interfaces.database import Database
 
+
 class UpdateDatabaseLogger(Handler):
     def __init__(self, db: Database):
         self.db = db

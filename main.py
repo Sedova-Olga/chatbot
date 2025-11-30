@@ -10,8 +10,9 @@ from handlers.confirm_order import ConfirmOrderHandler
 from handlers.update_database_logger import UpdateDatabaseLogger
 from implementations.postgres_db import PostgresDatabase
 from dotenv import load_dotenv
-import os
-load_dotenv() 
+
+load_dotenv()
+
 
 def main():
     # Инициализация зависимостей

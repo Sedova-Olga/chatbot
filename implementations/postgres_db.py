@@ -32,22 +32,26 @@ class PostgresDatabase(Database):
     def _init_tables(self):
         with self._get_connection() as conn:
             with conn.cursor() as cur:
-                cur.execute("""
+                cur.execute(
+                    """
                     CREATE TABLE IF NOT EXISTS users (
                         user_id BIGINT PRIMARY KEY,
                         state TEXT,
                         last_message_id INTEGER,
                         order_json TEXT
                     )
-                """)
-                cur.execute("""
+                """
+                )
+                cur.execute(
+                    """
                     CREATE TABLE IF NOT EXISTS telegram_events (
                         id SERIAL PRIMARY KEY,
                         update_id BIGINT UNIQUE NOT NULL,
                         raw_update TEXT NOT NULL,
                         timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                     )
-                """)
+                """
+                )
                 conn.commit()
 
     def get_user(self, user_id):
@@ -55,7 +59,7 @@ class PostgresDatabase(Database):
             with conn.cursor() as cur:
                 cur.execute(
                     "SELECT state, last_message_id, order_json FROM users WHERE user_id = %s",
-                    (user_id,)
+                    (user_id,),
                 )
                 row = cur.fetchone()
                 if row:
@@ -63,7 +67,7 @@ class PostgresDatabase(Database):
                     return {
                         "state": row[0],
                         "last_message_id": row[1],
-                        "order_json": order_json
+                        "order_json": order_json,
                     }
         return None
 
@@ -82,7 +86,7 @@ class PostgresDatabase(Database):
             with conn.cursor() as cur:
                 cur.execute(
                     "INSERT INTO users (user_id) VALUES (%s) ON CONFLICT (user_id) DO NOTHING",
-                    (user_id,)
+                    (user_id,),
                 )
                 conn.commit()
 
@@ -93,6 +97,6 @@ class PostgresDatabase(Database):
             with conn.cursor() as cur:
                 cur.execute(
                     "INSERT INTO telegram_events (update_id, raw_update) VALUES (%s, %s) ON CONFLICT DO NOTHING",
-                    (update_id, raw)
+                    (update_id, raw),
                 )
                 conn.commit()
