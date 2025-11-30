@@ -5,6 +5,7 @@ from contextlib import contextmanager
 from interfaces.database import Database
 import pg8000
 
+
 class PostgresDatabase(Database):
     def __init__(self):
         self._host = os.getenv("DB_HOST", "localhost")
