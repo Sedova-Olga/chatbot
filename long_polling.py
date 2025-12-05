@@ -3,6 +3,7 @@ import time
 from telegram_api import get_updates
 from database_client import save_telegram_event
 
+
 def start_long_polling(dispatcher):
     offset = None
     print("🍕 Pizza Bot запущен. Ожидание заказов...")

@@ -1,8 +1,10 @@
 # main.py
-import sqlite3
 from dispatcher import Dispatcher
 from long_polling import start_long_polling
-from database_client import init_db
+from interfaces.database import Database
+from interfaces.telegram import TelegramClient
+from implementations.sqlite_db import SqliteDatabase
+from implementations.telegram_api_impl import TelegramApiClient
 from handlers.start import StartHandler
 from handlers.pizza_name import PizzaNameHandler
 from handlers.pizza_size import PizzaSizeHandler
@@ -10,18 +12,24 @@ from handlers.drinks import DrinksHandler
 from handlers.confirm_order import ConfirmOrderHandler
 from handlers.update_database_logger import UpdateDatabaseLogger
 
+
 def main():
-    init_db()
-    db = sqlite3.connect("messages.db", check_same_thread=False)
+    # Инициализация зависимостей
+    db: Database = SqliteDatabase(db_path="messages.db")
+    telegram: TelegramClient = TelegramApiClient()
+
+    # Настройка диспетчера
     dp = Dispatcher()
-    dp.add_handler(StartHandler(db)) 
-    dp.add_handler(PizzaNameHandler(db))
-    dp.add_handler(PizzaSizeHandler(db))
-    dp.add_handler(DrinksHandler(db))
-    dp.add_handler(ConfirmOrderHandler(db))
+    dp.add_handler(StartHandler(telegram, db))
+    dp.add_handler(PizzaNameHandler(telegram, db))
+    dp.add_handler(PizzaSizeHandler(telegram, db))
+    dp.add_handler(DrinksHandler(telegram, db))
+    dp.add_handler(ConfirmOrderHandler(telegram, db))
     dp.add_handler(UpdateDatabaseLogger("messages.db"))
 
+    # Запуск
     start_long_polling(dp)
+
 
 if __name__ == "__main__":
     main()

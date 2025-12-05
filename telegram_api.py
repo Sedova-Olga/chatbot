@@ -13,10 +13,11 @@ if not BOT_TOKEN:
 
 BASE_URL = f"https://api.telegram.org/bot{BOT_TOKEN}"
 
+
 def send_message_with_inline_keyboard(chat_id: int, text: str, buttons: list):
     """
     Отправляет сообщение с инлайн-клавиатурой.
-    
+
     :param chat_id: ID чата
     :param text: Текст сообщения
     :param buttons: Список кнопок в формате:
@@ -27,6 +28,7 @@ def send_message_with_inline_keyboard(chat_id: int, text: str, buttons: list):
     """
     reply_markup = {"inline_keyboard": buttons}
     return send_message(chat_id, text, reply_markup=reply_markup)
+
 
 def _make_request(method: str, params: Optional[Dict[str, Any]] = None) -> Dict:
     """Универсальный метод для вызова Telegram Bot API."""
@@ -66,7 +68,7 @@ def send_message(
     chat_id: int,
     text: str,
     reply_markup: Optional[Dict] = None,
-    parse_mode: Optional[str] = None
+    parse_mode: Optional[str] = None,
 ) -> Dict:
     """Отправить текстовое сообщение."""
     params = {
@@ -80,7 +82,9 @@ def send_message(
     return _make_request("sendMessage", params)
 
 
-def answer_callback_query(callback_query_id: str, text: Optional[str] = None, show_alert: bool = False) -> Dict:
+def answer_callback_query(
+    callback_query_id: str, text: Optional[str] = None, show_alert: bool = False
+) -> Dict:
     """Подтвердить callback-запрос."""
     params = {"callback_query_id": callback_query_id}
     if text:
@@ -88,6 +92,7 @@ def answer_callback_query(callback_query_id: str, text: Optional[str] = None, sh
     if show_alert:
         params["show_alert"] = show_alert
     return _make_request("answerCallbackQuery", params)
+
 
 def delete_message(chat_id: int, message_id: int):
     """Удаляет сообщение по его ID."""

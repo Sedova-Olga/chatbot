@@ -12,6 +12,7 @@ if not BOT_TOKEN:
 
 BASE_URL = f"https://api.telegram.org/bot{BOT_TOKEN}"
 
+
 def get_updates(offset: int = None) -> dict | None:
     url = f"{BASE_URL}/getUpdates"
     if offset is not None:
@@ -22,6 +23,7 @@ def get_updates(offset: int = None) -> dict | None:
     except Exception as e:
         print(f"[API] get_updates error: {e}")
         return None
+
 
 def send_message(chat_id: int, text: str, reply_markup: dict = None):
     url = f"{BASE_URL}/sendMessage"

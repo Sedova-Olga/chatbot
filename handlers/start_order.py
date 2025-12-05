@@ -2,6 +2,7 @@
 from handler import Handler
 from telegram_api import send_message_with_inline_keyboard
 
+
 class StartOrderHandler(Handler):
     def check_update(self, update: dict, user_data: dict) -> bool:
         # Срабатывает на callback_data = "start_order"
@@ -18,8 +19,8 @@ class StartOrderHandler(Handler):
             [
                 [{"text": "Маргарита", "callback_data": "pizza:margarita"}],
                 [{"text": "Пепперони", "callback_data": "pizza:pepperoni"}],
-                [{"text": "Гавайская", "callback_data": "pizza:hawaiian"}]
-            ]
+                [{"text": "Гавайская", "callback_data": "pizza:hawaiian"}],
+            ],
         )
         # Меняем состояние
         return "WAIT_FOR_PIZZA_NAME"
