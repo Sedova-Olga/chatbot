@@ -10,8 +10,8 @@ class UpdateDatabaseLogger(Handler):
     def check_update(self, update: dict) -> bool:
         return True
 
-    def handle_update(self, update: dict) -> None:
+    async def handle_update(self, update: dict) -> None:
         try:
-            self.db.save_telegram_event(update)
+            await self.db.save_telegram_event(update)
         except Exception as e:
             print(f"Ошибка при логировании update_id={update.get('update_id')}: {e}")

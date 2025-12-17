@@ -1,16 +1,33 @@
 # handlers/restart.py
+import json
 from handler import Handler
-from telegram_api import send_message
-from database_client import update_user
+from interfaces.telegram import TelegramClient
+from interfaces.database import Database
 
 
 class RestartHandler(Handler):
-    def check_update(self, update: dict, user_data: dict) -> bool:
+    def __init__(self, telegram: TelegramClient, db: Database):
+        self.telegram = telegram
+        self.db = db
+
+    def check_update(self, update: dict) -> bool:
         text = update.get("message", {}).get("text", "").lower()
         return "заново" in text or "сначала" in text
 
-    def handle_update(self, update: dict, user_data: dict, chat_id: int) -> str | None:
+    async def handle_update(self, update: dict) -> None:
         user_id = update["message"]["from"]["id"]
-        update_user(user_id, state="WAIT_FOR_PIZZA_NAME", order_json={})
-        send_message(chat_id, "Начинаем заказ заново! 🍕\nКакую пиццу хотите?")
-        return None
+        chat_id = update["message"]["chat"]["id"]
+
+        # Сбрасываем заказ и состояние
+        await self.db.update_user(
+            user_id,
+            state="WAIT_FOR_PIZZA_NAME",
+            order_json=json.dumps({}),
+            last_message_id=None
+        )
+
+        # Отправляем сообщение
+        await self.telegram.send_message(
+            chat_id,
+            "Начинаем заказ заново! 🍕\nКакую пиццу хотите?"
+        )

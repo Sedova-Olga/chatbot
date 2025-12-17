@@ -11,18 +11,20 @@ class DrinksHandler(Handler):
         self.db: Database = db
 
     def check_update(self, update: dict) -> bool:
-        return "callback_query" in update and update["callback_query"][
-            "data"
-        ].startswith("drink:")
+        return (
+            "callback_query" in update
+            and update["callback_query"]["data"].startswith("drink:")
+        )
 
-    def handle_update(self, update: dict):
+    async def handle_update(self, update: dict):
         cb = update["callback_query"]
         callback_id = cb["id"]
         user_id = cb["from"]["id"]
         chat_id = cb["message"]["chat"]["id"]
         data = cb["data"]
 
-        self.telegram.answer_callback_query(callback_id)
+        # Подтверждаем нажатие кнопки
+        await self.telegram.answer_callback_query(callback_id)
 
         drink_map = {
             "drink:cola": "Кола",
@@ -32,20 +34,23 @@ class DrinksHandler(Handler):
         }
         drink = drink_map.get(data, "—")
 
-        user_data = self.db.get_user(user_id)
+        # Получаем данные пользователя
+        user_data = await self.db.get_user(user_id)
         if not user_data:
             return
 
         order_json = user_data.get("order_json") or {}
         order_json["drink"] = drink
 
+        # Удаляем предыдущее сообщение (если есть)
         last_msg_id = user_data.get("last_message_id")
         if last_msg_id:
             try:
-                self.telegram.delete_message(chat_id, last_msg_id)
+                await self.telegram.delete_message(chat_id, last_msg_id)
             except Exception:
                 pass
 
+        # Формируем текст заказа
         text = (
             f"Ваш заказ:\n\n"
             f"• Пицца: {order_json.get('pizza_name', '—')}\n"
@@ -59,13 +64,15 @@ class DrinksHandler(Handler):
             [{"text": "❌ Нет", "callback_data": "confirm:no"}],
         ]
 
-        response = self.telegram.send_message_with_inline_keyboard(
+        # Отправляем сообщение с подтверждением
+        response = await self.telegram.send_message_with_inline_keyboard(
             chat_id, text, buttons
         )
 
         new_msg_id = response["result"]["message_id"] if response.get("ok") else None
 
-        self.db.update_user(
+        # Сохраняем состояние
+        await self.db.update_user(
             user_id,
             state="WAIT_FOR_ORDER_APPROVE",
             order_json=json.dumps(order_json, ensure_ascii=False),

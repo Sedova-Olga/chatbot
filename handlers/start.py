@@ -13,21 +13,23 @@ class StartHandler(Handler):
     def check_update(self, update: dict) -> bool:
         return "message" in update and update["message"].get("text") == "/start"
 
-    def handle_update(self, update: dict):
+    async def handle_update(self, update: dict):
         user_id = update["message"]["from"]["id"]
         chat_id = update["message"]["chat"]["id"]
 
-        self.db.create_user(user_id)
-        user_data = self.db.get_user(user_id)
+        # Асинхронные вызовы к БД
+        await self.db.create_user(user_id)
+        user_data = await self.db.get_user(user_id)
 
         last_msg_id = user_data.get("last_message_id") if user_data else None
         if last_msg_id:
             try:
-                self.telegram.delete_message(chat_id, last_msg_id)
+                await self.telegram.delete_message(chat_id, last_msg_id)
             except Exception:
-                pass
+                pass  # Игнорируем ошибки удаления (например, если сообщение уже удалено)
 
-        response = self.telegram.send_message_with_inline_keyboard(
+        # Отправка нового сообщения
+        response = await self.telegram.send_message_with_inline_keyboard(
             chat_id,
             "🍕 Выберите пиццу:",
             [
@@ -38,7 +40,9 @@ class StartHandler(Handler):
         )
 
         new_msg_id = response["result"]["message_id"] if response.get("ok") else None
-        self.db.update_user(
+
+        # Сохранение состояния
+        await self.db.update_user(
             user_id,
             state="WAIT_FOR_PIZZA_NAME",
             order_json=json.dumps({}),
