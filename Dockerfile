@@ -1,13 +1,16 @@
+# Используем официальный образ Python
 FROM python:3.10-slim
 
+# Рабочая директория внутри контейнера
 WORKDIR /app
 
+# Копируем зависимости
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+# Копируем исходный код
+COPY bot/ bot/
+COPY .env .
 
-# Ждём готовности БД
-RUN apt-get update && apt-get install -y postgresql-client && rm -rf /var/lib/apt/lists/*
-
-CMD ["sh", "-c", "until pg_isready -h $DB_HOST -p $DB_PORT; do sleep 1; done && python main.py"]
+# Запуск бота
+CMD ["python", "-m", "bot"]

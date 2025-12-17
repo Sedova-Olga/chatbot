@@ -1,5 +1,2 @@
-python-dotenv==1.0.1
-black
-ruff
-pytest
-pg8000
+aiogram==3.23.0
+python-dotenv
