@@ -11,10 +11,9 @@ class PizzaNameHandler(Handler):
         self.db: Database = db
 
     def check_update(self, update: dict) -> bool:
-        return (
-            "callback_query" in update
-            and update["callback_query"]["data"].startswith("pizza:")
-        )
+        return "callback_query" in update and update["callback_query"][
+            "data"
+        ].startswith("pizza:")
 
     async def handle_update(self, update: dict):
         cb = update["callback_query"]

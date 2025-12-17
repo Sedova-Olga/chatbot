@@ -27,7 +27,9 @@ async def main():
 
     # Настройка диспетчера
     dp = Dispatcher()
-    dp.add_handler(UpdateDatabaseLogger(db))        # ← логгер (первым — если Dispatcher останавливается после первого хендлера)
+    dp.add_handler(
+        UpdateDatabaseLogger(db)
+    )  # ← логгер (первым — если Dispatcher останавливается после первого хендлера)
     dp.add_handler(StartHandler(telegram, db))
     dp.add_handler(PizzaNameHandler(telegram, db))
     dp.add_handler(PizzaSizeHandler(telegram, db))

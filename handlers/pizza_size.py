@@ -11,10 +11,9 @@ class PizzaSizeHandler(Handler):
         self.db: Database = db
 
     def check_update(self, update: dict) -> bool:
-        return (
-            "callback_query" in update
-            and update["callback_query"]["data"].startswith("size:")
-        )
+        return "callback_query" in update and update["callback_query"][
+            "data"
+        ].startswith("size:")
 
     async def handle_update(self, update: dict):
         cb = update["callback_query"]

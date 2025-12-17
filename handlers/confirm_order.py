@@ -11,10 +11,9 @@ class ConfirmOrderHandler(Handler):
         self.db: Database = db
 
     def check_update(self, update: dict) -> bool:
-        return (
-            "callback_query" in update
-            and update["callback_query"]["data"].startswith("confirm:")
-        )
+        return "callback_query" in update and update["callback_query"][
+            "data"
+        ].startswith("confirm:")
 
     async def handle_update(self, update: dict):
         cb = update["callback_query"]

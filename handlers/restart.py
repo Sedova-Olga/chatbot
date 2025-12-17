@@ -23,11 +23,10 @@ class RestartHandler(Handler):
             user_id,
             state="WAIT_FOR_PIZZA_NAME",
             order_json=json.dumps({}),
-            last_message_id=None
+            last_message_id=None,
         )
 
         # Отправляем сообщение
         await self.telegram.send_message(
-            chat_id,
-            "Начинаем заказ заново! 🍕\nКакую пиццу хотите?"
+            chat_id, "Начинаем заказ заново! 🍕\nКакую пиццу хотите?"
         )

@@ -41,7 +41,7 @@ class StartOrderHandler(Handler):
                 [{"text": "Маргарита", "callback_data": "pizza:margarita"}],
                 [{"text": "Пепперони", "callback_data": "pizza:pepperoni"}],
                 [{"text": "Гавайская", "callback_data": "pizza:hawaiian"}],
-            ]
+            ],
         )
 
         # Сохраняем состояние и сбрасываем заказ
@@ -51,5 +51,5 @@ class StartOrderHandler(Handler):
             state="WAIT_FOR_PIZZA_NAME",
             order_json=json.dumps({}),
             last_message_at=None,
-            last_message_id=new_msg_id
+            last_message_id=new_msg_id,
         )

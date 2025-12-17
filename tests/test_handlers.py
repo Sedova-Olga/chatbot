@@ -1,7 +1,5 @@
 # tests/test_handlers.py
 import json
-import tempfile
-import os
 import pytest
 from unittest.mock import AsyncMock
 from handlers.pizza_name import PizzaNameHandler
@@ -65,9 +63,7 @@ async def test_start_handler_initializes_user_and_sends_pizza_menu():
 
     handler = StartHandler(telegram, db)
 
-    update = {
-        "message": {"text": "/start", "from": {"id": 555}, "chat": {"id": 555}}
-    }
+    update = {"message": {"text": "/start", "from": {"id": 555}, "chat": {"id": 555}}}
 
     await handler.handle_update(update)
 

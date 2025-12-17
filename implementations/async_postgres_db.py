@@ -5,6 +5,7 @@ import asyncpg
 from interfaces.database import Database
 from utils import log_execution_time
 
+
 class AsyncPostgresDatabase(Database):
     def __init__(self):
         self._host = os.getenv("DB_HOST", "localhost")
@@ -20,25 +21,29 @@ class AsyncPostgresDatabase(Database):
             port=self._port,
             user=self._user,
             password=self._password,
-            database=self._database
+            database=self._database,
         )
         try:
-            await conn.execute("""
+            await conn.execute(
+                """
                 CREATE TABLE IF NOT EXISTS users (
                     user_id BIGINT PRIMARY KEY,
                     state TEXT,
                     last_message_id INTEGER,
                     order_json TEXT
                 )
-            """)
-            await conn.execute("""
+            """
+            )
+            await conn.execute(
+                """
                 CREATE TABLE IF NOT EXISTS telegram_events (
                     id SERIAL PRIMARY KEY,
                     update_id BIGINT UNIQUE NOT NULL,
                     raw_update TEXT NOT NULL,
                     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
-            """)
+            """
+            )
         finally:
             await conn.close()
 
@@ -49,19 +54,19 @@ class AsyncPostgresDatabase(Database):
             port=self._port,
             user=self._user,
             password=self._password,
-            database=self._database
+            database=self._database,
         )
         try:
             row = await conn.fetchrow(
                 "SELECT state, last_message_id, order_json FROM users WHERE user_id = $1",
-                user_id
+                user_id,
             )
             if row:
                 order_json = json.loads(row[2]) if row[2] else {}
                 return {
                     "state": row[0],
                     "last_message_id": row[1],
-                    "order_json": order_json
+                    "order_json": order_json,
                 }
             return None
         finally:
@@ -71,19 +76,20 @@ class AsyncPostgresDatabase(Database):
     async def update_user(self, user_id, **kwargs):
         if not kwargs:
             return
-        set_clause = ", ".join(f"{k} = ${i}" for i, k in enumerate(kwargs.keys(), start=1))
+        set_clause = ", ".join(
+            f"{k} = ${i}" for i, k in enumerate(kwargs.keys(), start=1)
+        )
         values = list(kwargs.values()) + [user_id]
         conn = await asyncpg.connect(
             host=self._host,
             port=self._port,
             user=self._user,
             password=self._password,
-            database=self._database
+            database=self._database,
         )
         try:
             await conn.execute(
-                f"UPDATE users SET {set_clause} WHERE user_id = ${len(values)}",
-                *values
+                f"UPDATE users SET {set_clause} WHERE user_id = ${len(values)}", *values
             )
         finally:
             await conn.close()
@@ -95,12 +101,12 @@ class AsyncPostgresDatabase(Database):
             port=self._port,
             user=self._user,
             password=self._password,
-            database=self._database
+            database=self._database,
         )
         try:
             await conn.execute(
                 "INSERT INTO users (user_id) VALUES ($1) ON CONFLICT (user_id) DO NOTHING",
-                user_id
+                user_id,
             )
         finally:
             await conn.close()
@@ -114,12 +120,13 @@ class AsyncPostgresDatabase(Database):
             port=self._port,
             user=self._user,
             password=self._password,
-            database=self._database
+            database=self._database,
         )
         try:
             await conn.execute(
                 "INSERT INTO telegram_events (update_id, raw_update) VALUES ($1, $2) ON CONFLICT DO NOTHING",
-                update_id, raw
+                update_id,
+                raw,
             )
         finally:
             await conn.close()

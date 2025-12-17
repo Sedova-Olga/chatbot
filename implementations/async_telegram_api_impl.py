@@ -19,7 +19,9 @@ class AsyncTelegramApiClient(TelegramClient):
             self._session = aiohttp.ClientSession()
         return self._session
 
-    async def send_message(self, chat_id: int, text: str, parse_mode: str | None = None) -> dict:
+    async def send_message(
+        self, chat_id: int, text: str, parse_mode: str | None = None
+    ) -> dict:
         session = await self._get_session()
         url = f"{BASE_URL}/sendMessage"
         payload = {"chat_id": chat_id, "text": text}
@@ -27,6 +29,7 @@ class AsyncTelegramApiClient(TelegramClient):
             payload["parse_mode"] = parse_mode
 
         from utils import log_execution_time
+
         @log_execution_time
         async def _inner():
             async with session.post(url, json=payload) as response:
@@ -42,10 +45,11 @@ class AsyncTelegramApiClient(TelegramClient):
         payload = {
             "chat_id": chat_id,
             "text": text,
-            "reply_markup": {"inline_keyboard": buttons}
+            "reply_markup": {"inline_keyboard": buttons},
         }
 
         from utils import log_execution_time
+
         @log_execution_time
         async def _inner():
             async with session.post(url, json=payload) as response:
@@ -59,6 +63,7 @@ class AsyncTelegramApiClient(TelegramClient):
         payload = {"chat_id": chat_id, "message_id": message_id}
 
         from utils import log_execution_time
+
         @log_execution_time
         async def _inner():
             async with session.post(url, json=payload) as response:
@@ -66,7 +71,9 @@ class AsyncTelegramApiClient(TelegramClient):
 
         return await _inner()
 
-    async def answer_callback_query(self, callback_id: str, text: str | None = None) -> dict:
+    async def answer_callback_query(
+        self, callback_id: str, text: str | None = None
+    ) -> dict:
         session = await self._get_session()
         url = f"{BASE_URL}/answerCallbackQuery"
         payload = {"callback_query_id": callback_id}
@@ -74,6 +81,7 @@ class AsyncTelegramApiClient(TelegramClient):
             payload["text"] = text
 
         from utils import log_execution_time
+
         @log_execution_time
         async def _inner():
             async with session.post(url, json=payload) as response:
