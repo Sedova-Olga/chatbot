@@ -2,8 +2,6 @@
 import asyncio
 from dotenv import load_dotenv
 
-load_dotenv()
-
 from dispatcher import Dispatcher
 from long_polling import start_long_polling
 
@@ -18,6 +16,8 @@ from handlers.pizza_size import PizzaSizeHandler
 from handlers.drinks import DrinksHandler
 from handlers.confirm_order import ConfirmOrderHandler
 from handlers.update_database_logger import UpdateDatabaseLogger
+
+load_dotenv()
 
 
 async def main():
