@@ -2,4 +2,3 @@ aiogram==3.23.0
 python-dotenv
 black
 ruff
-pytest
